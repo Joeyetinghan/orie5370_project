@@ -9,6 +9,7 @@ pd.set_option('mode.chained_assignment', None)
 """
 def calc_kalman(data,start):  
     data.dropna(inplace = True)
+    indexs = data.index
     data.reset_index(drop = True, inplace = True)
     df = data.copy()
     name = df.columns.tolist()
@@ -48,13 +49,14 @@ def calc_kalman(data,start):
     #得到alpha和beta
     df['alpha'] = pd.Series(filter_mean[:,0], index = df.index) #截距
     df['beta'] = pd.Series(filter_mean[:,1], index = df.index) #斜率
-    df['predict'] = df['alpha'] + df['beta']*df[name[0]]
-    df.loc[:start_index,'predict'] = 0
-    # df.to_csv('test.csv')
-    return df 
+    df['predict'] = df['alpha'].shift() + df['beta'].shift()*df[name[0]]
+    df.loc[:start_index,'predict'] = np.nan
+    df.index = indexs
+    return df['predict']
 
 def calc_kalman_multi(data,start):  
     data.dropna(inplace = True)
+    indexs = data.index
     data.reset_index(drop = True, inplace = True)
     df = data.copy()
     name = df.columns.tolist()
@@ -98,23 +100,23 @@ def calc_kalman_multi(data,start):
     df['alpha'] = pd.Series(filter_mean[:,0], index = df.index) #截距
     df['beta_1'] = pd.Series(filter_mean[:,1], index = df.index) #斜率
     df['beta_2'] = pd.Series(filter_mean[:,2], index = df.index) #斜率
-    df['predict'] = df['alpha'] + df['beta_1']*df[name[1]] + df['beta_2']*df[name[2]]
-    df.loc[:start_index,'predict'] = 0
-    # df.to_csv('test.csv')
-    return df 
+    df['predict'] = df['alpha'].shift() + df['beta_1'].shift()*df[name[1]] + df['beta_2'].shift()*df[name[2]]
+    df.loc[:start_index,'predict'] = np.nan
+    df.index = indexs
+    return df['predict'] 
 
 if __name__ == "__main__":
-    os.chdir('D:\Memory\Cornell\ORIE 5370')
+    os.chdir('D:\学习\Cornell\ORIE 5370')
     maindata = pd.read_hdf('D:\\Trading\\多因子\\maindata_1D.h5')
-    df = maindata[maindata['fid'] == 'BTC']
-    data = pd.DataFrame({'target':df['open'].shift(-2)/df['open'].shift(-1)-1,'return':df['close']/df['close'].shift()-1,'return_vol':df['volume']/df['volume'].shift()-1})
-    res = calc_kalman(data,0.4)
-    res = res[res['predict'] != 0]
-    accuracy = np.sign(res['predict']) - np.sign(res['target'])
-    accuracy = len(accuracy[accuracy == 0])/len(accuracy)
-    print('精确度为' + str(round(accuracy,3)) + '%')
-    res = calc_kalman_multi(data,0.4)
-    res = res[res['predict'] != 0]
-    accuracy = np.sign(res['predict']) - np.sign(res['target'])
-    accuracy = len(accuracy[accuracy == 0])/len(accuracy)
-    print('精确度为' + str(round(accuracy,3)) + '%')
+    res1 = pd.DataFrame()
+    res2 = pd.DataFrame()
+    for fid in maindata['fid'].unique()[:3]:
+        df = maindata[maindata['fid'] == fid]
+        data = pd.DataFrame({'target':df['close'].shift(-1)/df['close']-1,'return':df['close']/df['close'].shift()-1,'return_vol':df['volume']/df['volume'].shift()-1})
+        data.index = df['tradetime'].values
+        a = pd.DataFrame({fid:calc_kalman(data,0.4)})
+        res1 = pd.concat([res1, a], axis = 1)
+        a = pd.DataFrame({fid:calc_kalman_multi(data,0.4)})
+        res2 = pd.concat([res2, a], axis = 1)
+        # res2[fid] = calc_kalman_multi(data,0.4)
+    print(res1)
