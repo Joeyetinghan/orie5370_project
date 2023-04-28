@@ -105,18 +105,18 @@ def calc_kalman_multi(data,start):
     df.index = indexs
     return df['predict'] 
 
-if __name__ == "__main__":
-    os.chdir('D:\学习\Cornell\ORIE 5370')
-    maindata = pd.read_hdf('D:\\Trading\\多因子\\maindata_1D.h5')
-    res1 = pd.DataFrame()
-    res2 = pd.DataFrame()
-    for fid in maindata['fid'].unique()[:3]:
-        df = maindata[maindata['fid'] == fid]
-        data = pd.DataFrame({'target':df['close'].shift(-1)/df['close']-1,'return':df['close']/df['close'].shift()-1,'return_vol':df['volume']/df['volume'].shift()-1})
-        data.index = df['tradetime'].values
-        a = pd.DataFrame({fid:calc_kalman(data,0.4)})
-        res1 = pd.concat([res1, a], axis = 1)
-        a = pd.DataFrame({fid:calc_kalman_multi(data,0.4)})
-        res2 = pd.concat([res2, a], axis = 1)
-        # res2[fid] = calc_kalman_multi(data,0.4)
-    print(res1)
+# if __name__ == "__main__":
+#     os.chdir('D:\学习\Cornell\ORIE 5370')
+#     maindata = pd.read_hdf('D:\\Trading\\多因子\\maindata_1D.h5')
+#     res1 = pd.DataFrame()
+#     res2 = pd.DataFrame()
+#     for fid in maindata['fid'].unique()[:3]:
+#         df = maindata[maindata['fid'] == fid]
+#         data = pd.DataFrame({'target':df['close'].shift(-1)/df['close']-1,'return':df['close']/df['close'].shift()-1,'return_vol':df['volume']/df['volume'].shift()-1})
+#         data.index = df['tradetime'].values
+#         a = pd.DataFrame({fid:calc_kalman(data,0.4)})
+#         res1 = pd.concat([res1, a], axis = 1)
+#         a = pd.DataFrame({fid:calc_kalman_multi(data,0.4)})
+#         res2 = pd.concat([res2, a], axis = 1)
+#         # res2[fid] = calc_kalman_multi(data,0.4)
+#     print(res1)
