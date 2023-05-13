@@ -1,7 +1,4 @@
-
-__pycache__/price.cpython-39.pyc
-.ipynb_checkpoints/model-checkpoint.ipynb
-__pycache__/kalman.cpython-39.pyc
-.ipynb_checkpoints/model-checkpoint.ipynb
-.ipynb_checkpoints/model-checkpoint.ipynb
-.ipynb_checkpoints
+.ipynb_checkpoints/
+.pyc
+__pycache__/
+.DS_Store
